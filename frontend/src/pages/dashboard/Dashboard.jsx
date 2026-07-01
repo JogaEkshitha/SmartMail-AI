@@ -1,0 +1,17 @@
+function Dashboard() {
+          return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-100">
+              <div className="bg-white p-10 rounded-2xl shadow-xl text-center">
+                <h1 className="text-4xl font-bold text-blue-600">
+                  Welcome to SmartMail AI 🚀
+                </h1>
+        
+                <p className="mt-4 text-gray-600">
+                  Login Successful!
+                </p>
+              </div>
+            </div>
+          );
+        }
+        
+        export default Dashboard;

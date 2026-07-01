@@ -1,8 +1,19 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status
+from django.contrib.auth.models import User
+from rest_framework import serializers
 
-from .serializers import RegisterSerializer
+
+class RegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["username", "password"]
+        extra_kwargs = {
+            "password": {"write_only": True}
+        }
+
+    def create(self, validated_data):
+        return User.objects.create_user(**validated_data)
 
 
 @api_view(["GET"])
@@ -18,9 +29,8 @@ def register(request):
 
     if serializer.is_valid():
         serializer.save()
-        return Response(
-            {"message": "User Registered Successfully"},
-            status=status.HTTP_201_CREATED,
-        )
+        return Response({
+            "message": "User Registered Successfully"
+        }, status=201)
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer.errors, status=400)
