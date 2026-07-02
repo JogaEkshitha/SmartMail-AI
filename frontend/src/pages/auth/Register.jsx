@@ -73,7 +73,7 @@ const Register = () => {
                   size="lg"
                   className="w-full justify-center"
                 >
-                  Register
+                  Sign in
                 </Button>
               </form>
 

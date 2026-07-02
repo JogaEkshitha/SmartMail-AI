@@ -1,3 +1,26 @@
 from django.contrib import admin
+from .models import Email
 
-# Register your models here.
+
+@admin.register(Email)
+class EmailAdmin(admin.ModelAdmin):
+    list_display = (
+        "subject",
+        "sender",
+        "recipient",
+        "priority",
+        "is_read",
+        "created_at",
+    )
+
+    list_filter = (
+        "priority",
+        "is_read",
+        "created_at",
+    )
+
+    search_fields = (
+        "subject",
+        "sender__username",
+        "recipient__username",
+    )

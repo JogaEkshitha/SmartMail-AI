@@ -112,7 +112,7 @@ const Header = () => {
               to="/register"
               className="rounded-full px-5 py-2 text-sm font-medium text-slate-200 transition hover:bg-cyan-500/10 hover:text-cyan-400"
             >
-              Register
+              
             </Link>
 
           </nav>

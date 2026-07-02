@@ -4,6 +4,7 @@ import Home from "../pages/home/Home";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import Dashboard from "../pages/dashboard/Dashboard";
+import Inbox from "../pages/dashboard/Inbox";
 
 function AppRoutes() {
   return (
@@ -13,6 +14,7 @@ function AppRoutes() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard/inbox" element={<Inbox />} />
       </Routes>
     </BrowserRouter>
   );

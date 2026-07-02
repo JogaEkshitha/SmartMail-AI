@@ -98,7 +98,7 @@ const Login = () => {
                 />
 
                 <Button type="submit" className="w-full">
-                  Sign In
+                  login
                 </Button>
               </form>
 
@@ -110,7 +110,7 @@ const Login = () => {
                     to="/register"
                     className="font-medium text-cyan-400 transition-colors duration-200 hover:text-cyan-300"
                   >
-                    Register
+                    sign in
                   </Link>
                 </p>
               </div>
