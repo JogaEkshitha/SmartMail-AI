@@ -7,6 +7,10 @@ from .serializers import EmailSerializer
 from .models import Email
 
 
+# --------------------------
+# Send Email API
+# --------------------------
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def send_email(request):
@@ -44,3 +48,27 @@ def inbox(request):
     )
 
     return Response(serializer.data)
+
+
+# --------------------------
+# Email Detail API
+# --------------------------
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def email_detail(request, email_id):
+    try:
+        email = Email.objects.get(
+            id=email_id,
+            recipient=request.user
+        )
+
+        serializer = EmailSerializer(email)
+
+        return Response(serializer.data)
+
+    except Email.DoesNotExist:
+        return Response(
+            {"error": "Email not found."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
