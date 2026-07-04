@@ -1,59 +1,43 @@
-import { useState } from "react";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import PageHeader from "../../components/dashboard/PageHeader";
-import Button from "../../components/common/Button";
-import ComposeModal from "../../components/dashboard/ComposeModal";
-import { Plus, Mail } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Brain } from "lucide-react";
 
 import useEmailSearch from "../../hooks/useEmailSearch";
 
-function Inbox() {
-  const [isComposeOpen, setIsComposeOpen] = useState(false);
-
-  const { emails, loading } = useEmailSearch("emails/inbox/");
-
-  const navigate = useNavigate();
+function Summary() {
+  const { emails, loading } = useEmailSearch("emails/summary/");
 
   return (
     <DashboardLayout>
-      <div className="flex items-start justify-between">
-        <PageHeader
-          title="Inbox"
-          subtitle="View and manage all your received emails."
-        />
-
-        <Button onClick={() => setIsComposeOpen(true)}>
-          <Plus size={18} />
-          Compose
-        </Button>
-      </div>
+      <PageHeader
+        title="AI Summary"
+        subtitle="Quick summaries of your received emails."
+      />
 
       <div className="mt-8 space-y-4">
         {loading ? (
           <div className="rounded-3xl border border-white/10 bg-white/5 p-10 text-center">
-            <p className="text-slate-400">Loading emails...</p>
+            <p className="text-slate-400">Loading summaries...</p>
           </div>
         ) : emails.length === 0 ? (
           <div className="rounded-3xl border border-white/10 bg-white/5 p-16 text-center backdrop-blur-3xl">
-            <Mail
+            <Brain
               size={60}
               className="mx-auto mb-4 text-slate-500"
             />
 
             <h2 className="text-2xl font-bold text-white">
-              No Emails Yet
+              No Summaries Available
             </h2>
 
             <p className="mt-3 text-slate-400">
-              Your received emails will appear here.
+              AI-generated summaries will appear here.
             </p>
           </div>
         ) : (
           emails.map((email) => (
             <div
               key={email.id}
-              onClick={() => navigate(`/dashboard/inbox/${email.id}`)}
               className="
                 rounded-3xl
                 border
@@ -61,10 +45,13 @@ function Inbox() {
                 bg-white/5
                 p-6
                 backdrop-blur-xl
-                transition
+                transition-all
+                duration-300
+                hover:-translate-y-1
                 hover:border-cyan-400/40
                 hover:bg-white/10
-                cursor-pointer
+                hover:shadow-lg
+                hover:shadow-cyan-500/10
               "
             >
               <div className="flex items-center justify-between">
@@ -91,20 +78,24 @@ function Inbox() {
                 </span>
               </div>
 
-              <p className="mt-4 line-clamp-2 text-slate-300">
-                {email.body}
-              </p>
+              <div className="mt-5 rounded-2xl border border-cyan-400/30 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 p-5 shadow-inner">
+                <div className="mb-2 flex items-center gap-2">
+                  <Brain className="h-5 w-5 text-cyan-400" />
+                  <span className="font-semibold text-cyan-300">
+                    AI Summary
+                  </span>
+                </div>
+
+                <p className="leading-7 text-slate-200">
+                  {email.summary || "No summary available."}
+                </p>
+              </div>
             </div>
           ))
         )}
       </div>
-
-      <ComposeModal
-        isOpen={isComposeOpen}
-        onClose={() => setIsComposeOpen(false)}
-      />
     </DashboardLayout>
   );
 }
 
-export default Inbox;
+export default Summary;

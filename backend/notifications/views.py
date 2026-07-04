@@ -1,0 +1,81 @@
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+from .models import Notification
+from .serializers import NotificationSerializer
+
+
+# -----------------------------
+# Get Notifications
+# -----------------------------
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def notifications_list(request):
+
+    notifications = Notification.objects.filter(
+        user=request.user
+    )
+
+    serializer = NotificationSerializer(
+        notifications,
+        many=True
+    )
+
+    unread_count = notifications.filter(
+        is_read=False
+    ).count()
+
+    return Response({
+        "unread": unread_count,
+        "notifications": serializer.data,
+    })
+
+
+# -----------------------------
+# Mark One Notification Read
+# -----------------------------
+
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def mark_notification_read(request, pk):
+
+    try:
+        notification = Notification.objects.get(
+            id=pk,
+            user=request.user
+        )
+
+        notification.is_read = True
+        notification.save()
+
+        return Response({
+            "message": "Notification marked as read."
+        })
+
+    except Notification.DoesNotExist:
+
+        return Response({
+            "error": "Notification not found."
+        }, status=404)
+
+
+# -----------------------------
+# Mark All Read
+# -----------------------------
+
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def mark_all_notifications_read(request):
+
+    Notification.objects.filter(
+        user=request.user,
+        is_read=False
+    ).update(
+        is_read=True
+    )
+
+    return Response({
+        "message": "All notifications marked as read."
+    })

@@ -1,9 +1,11 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, Link, useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 import {
   Sparkles,
   LayoutDashboard,
   Inbox,
+  Send,
   Brain,
   ShieldAlert,
   Star,
@@ -23,6 +25,11 @@ const menuItems = [
     name: "Inbox",
     path: "/dashboard/inbox",
     icon: Inbox,
+  },
+  {
+    name: "Sent",
+    path: "/dashboard/sent",
+    icon: Send,
   },
   {
     name: "AI Summary",
@@ -57,11 +64,25 @@ const menuItems = [
 ];
 
 const Sidebar = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+
+    toast.success("Logged out successfully!");
+
+    navigate("/");
+  };
+
   return (
     <aside className="flex h-screen w-72 flex-col border-r border-white/10 bg-white/5 backdrop-blur-3xl">
       {/* Logo */}
       <div className="border-b border-white/10 px-6 py-8">
-        <div className="flex items-center gap-4">
+        <Link
+          to="/"
+          className="flex items-center gap-4 transition-opacity hover:opacity-90"
+        >
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 backdrop-blur-xl">
             <Sparkles className="h-7 w-7 text-cyan-400" />
           </div>
@@ -75,7 +96,7 @@ const Sidebar = () => {
               AI Email Assistant
             </p>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Navigation */}
@@ -112,6 +133,7 @@ const Sidebar = () => {
       <div className="border-t border-white/10 p-4">
         <button
           type="button"
+          onClick={handleLogout}
           className="group flex w-full items-center gap-4 rounded-xl border border-transparent px-4 py-3 text-sm font-medium text-slate-300 transition-all duration-300 hover:border-red-500/20 hover:bg-red-500/15 hover:text-red-400"
         >
           <LogOut className="h-5 w-5 transition-transform duration-300 group-hover:-translate-x-1" />

@@ -1,38 +1,26 @@
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import PageHeader from "../../components/dashboard/PageHeader";
-import Button from "../../components/common/Button";
-import ComposeModal from "../../components/dashboard/ComposeModal";
-import { Plus, Mail } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Mail } from "lucide-react";
 
 import useEmailSearch from "../../hooks/useEmailSearch";
 
-function Inbox() {
-  const [isComposeOpen, setIsComposeOpen] = useState(false);
-
-  const { emails, loading } = useEmailSearch("emails/inbox/");
+function Sent() {
+  const { emails, loading } = useEmailSearch("emails/sent/");
 
   const navigate = useNavigate();
 
   return (
     <DashboardLayout>
-      <div className="flex items-start justify-between">
-        <PageHeader
-          title="Inbox"
-          subtitle="View and manage all your received emails."
-        />
-
-        <Button onClick={() => setIsComposeOpen(true)}>
-          <Plus size={18} />
-          Compose
-        </Button>
-      </div>
+      <PageHeader
+        title="Sent"
+        subtitle="View all emails you have sent."
+      />
 
       <div className="mt-8 space-y-4">
         {loading ? (
           <div className="rounded-3xl border border-white/10 bg-white/5 p-10 text-center">
-            <p className="text-slate-400">Loading emails...</p>
+            <p className="text-slate-400">Loading sent emails...</p>
           </div>
         ) : emails.length === 0 ? (
           <div className="rounded-3xl border border-white/10 bg-white/5 p-16 text-center backdrop-blur-3xl">
@@ -42,11 +30,11 @@ function Inbox() {
             />
 
             <h2 className="text-2xl font-bold text-white">
-              No Emails Yet
+              No Sent Emails
             </h2>
 
             <p className="mt-3 text-slate-400">
-              Your received emails will appear here.
+              Emails you send will appear here.
             </p>
           </div>
         ) : (
@@ -55,6 +43,7 @@ function Inbox() {
               key={email.id}
               onClick={() => navigate(`/dashboard/inbox/${email.id}`)}
               className="
+                cursor-pointer
                 rounded-3xl
                 border
                 border-white/10
@@ -64,7 +53,6 @@ function Inbox() {
                 transition
                 hover:border-cyan-400/40
                 hover:bg-white/10
-                cursor-pointer
               "
             >
               <div className="flex items-center justify-between">
@@ -74,7 +62,7 @@ function Inbox() {
                   </h2>
 
                   <p className="mt-1 text-cyan-400">
-                    From: {email.sender}@smartmail.com
+                    To: {email.recipient}@smartmail.com
                   </p>
                 </div>
 
@@ -98,13 +86,8 @@ function Inbox() {
           ))
         )}
       </div>
-
-      <ComposeModal
-        isOpen={isComposeOpen}
-        onClose={() => setIsComposeOpen(false)}
-      />
     </DashboardLayout>
   );
 }
 
-export default Inbox;
+export default Sent;

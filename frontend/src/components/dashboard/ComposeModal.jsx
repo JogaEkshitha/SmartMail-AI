@@ -3,6 +3,7 @@ import { X, Send } from "lucide-react";
 import Input from "../common/Input";
 import Button from "../common/Button";
 import api from "../../services/api";
+import { toast } from "react-hot-toast";
 
 const ComposeModal = ({ isOpen, onClose }) => {
   const [recipient, setRecipient] = useState("");
@@ -14,7 +15,7 @@ const ComposeModal = ({ isOpen, onClose }) => {
 
   const handleSendEmail = async () => {
     if (!recipient || !subject || !body) {
-      alert("Please fill in all fields.");
+      toast.error("Please fill in all fields.");
       return;
     }
 
@@ -22,27 +23,34 @@ const ComposeModal = ({ isOpen, onClose }) => {
 
     try {
       await api.post("emails/send/", {
-        recipient,
+        recipient_username: recipient,
         subject,
         body,
       });
 
-      alert("Email sent successfully!");
+      // Refresh notification bell immediately
+      window.dispatchEvent(
+        new Event("notificationUpdated")
+      );
 
-      // Reset form
+      toast.success("Email sent successfully!");
+
       setRecipient("");
       setSubject("");
       setBody("");
 
-      // Close modal
       onClose();
     } catch (error) {
       console.error(error);
 
       if (error.response) {
-        alert(JSON.stringify(error.response.data));
+        toast.error(
+          error.response?.data?.recipient_username ||
+            error.response?.data?.recipient ||
+            "Failed to send email."
+        );
       } else {
-        alert("Failed to send email.");
+        toast.error("Failed to send email.");
       }
     } finally {
       setLoading(false);

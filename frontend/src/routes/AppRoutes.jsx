@@ -1,20 +1,106 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Home from "../pages/home/Home";
-import Login from "../pages/auth/Login";
-import Register from "../pages/auth/Register";
+import SignIn from "../pages/auth/SignIn";
+import SignUp from "../pages/auth/SignUp";
+
 import Dashboard from "../pages/dashboard/Dashboard";
 import Inbox from "../pages/dashboard/Inbox";
+import EmailDetail from "../pages/dashboard/EmailDetail";
+import Sent from "../pages/dashboard/Sent";
+import Summary from "../pages/dashboard/Summary";
+import Priority from "../pages/dashboard/Priority";
+
+import ProtectedRoute from "./ProtectedRoute";
+import GuestRoute from "./GuestRoute";
 
 function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/dashboard/inbox" element={<Inbox />} />
+
+        {/* Guest Routes */}
+
+        <Route
+          path="/"
+          element={<Home />}
+          
+        />
+
+        <Route
+          path="/login"
+          element={
+            <GuestRoute>
+              <SignIn />
+            </GuestRoute>
+          }
+        />
+
+        <Route
+          path="/signup"
+          element={
+            <GuestRoute>
+              <SignUp />
+            </GuestRoute>
+          }
+        />
+
+        {/* Protected Routes */}
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/inbox"
+          element={
+            <ProtectedRoute>
+              <Inbox />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/inbox/:id"
+          element={
+            <ProtectedRoute>
+              <EmailDetail />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/sent"
+          element={
+            <ProtectedRoute>
+              <Sent />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/summary"
+          element={
+            <ProtectedRoute>
+              <Summary />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/priority"
+          element={
+            <ProtectedRoute>
+              <Priority />
+            </ProtectedRoute>
+          }
+        />
+
       </Routes>
     </BrowserRouter>
   );
