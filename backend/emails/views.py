@@ -22,9 +22,9 @@ def send_email(request):
         # Save email
         email = serializer.save()
 
-        # -----------------------------
-        # Sender Notification
-        # -----------------------------
+ # -----------------------------
+ # Sender Notification
+ # -----------------------------
         create_notification(
             user=request.user,
             title="Email Sent",
@@ -32,9 +32,9 @@ def send_email(request):
             notification_type="EMAIL_SENT",
         )
 
-        # -----------------------------
-        # Receiver Notification
-        # -----------------------------
+# -----------------------------
+# Receiver Notification
+# -----------------------------
         create_notification(
             user=email.recipient,
             title="New Email",
@@ -42,9 +42,9 @@ def send_email(request):
             notification_type="EMAIL_RECEIVED",
         )
 
-        # -----------------------------
-        # High Priority Notification
-        # -----------------------------
+# -----------------------------
+# High Priority Notification
+# -----------------------------
         if email.priority == "High":
             create_notification(
                 user=email.recipient,
@@ -65,7 +65,6 @@ def send_email(request):
         status=status.HTTP_400_BAD_REQUEST,
     )
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # --------------------------
@@ -220,3 +219,71 @@ def priority_emails(request):
     )
 
     return Response(serializer.data)
+    
+ # --------------------------
+ # Spam Emails API
+ # --------------------------
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def spam_emails(request):
+
+    emails = Email.objects.filter(
+        recipient=request.user,
+        is_spam=True
+    ).order_by("-created_at")
+
+    serializer = EmailSerializer(
+        emails,
+        many=True
+    )
+
+    return Response(serializer.data)
+
+ # --------------------------
+ # Categories API
+ # --------------------------
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def categories(request):
+
+    emails = Email.objects.filter(
+        recipient=request.user
+    ).order_by("-created_at")
+
+    serializer = EmailSerializer(
+        emails,
+        many=True
+    )
+
+    return Response(serializer.data)
+
+# --------------------------
+# Analytics API
+# --------------------------
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def analytics(request):
+
+    emails = Email.objects.filter(recipient=request.user)
+
+    total = emails.count()
+    spam = emails.filter(is_spam=True).count()
+    priority = emails.filter(priority="High").count()
+
+    categories = {
+        "Work": emails.filter(category="Work").count(),
+        "Finance": emails.filter(category="Finance").count(),
+        "Personal": emails.filter(category="Personal").count(),
+        "Promotion": emails.filter(category="Promotion").count(),
+        "General": emails.filter(category="General").count(),
+    }
+
+    return Response({
+        "total_emails": total,
+        "spam_emails": spam,
+        "priority_emails": priority,
+        "categories": categories,
+    })

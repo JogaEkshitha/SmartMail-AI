@@ -1,6 +1,9 @@
 import { CalendarDays, Sparkles } from "lucide-react";
+import useProfile from "../../hooks/useProfile";
 
 const WelcomeCard = ({ insights }) => {
+  const { profile } = useProfile();
+
   const hour = new Date().getHours();
 
   let greeting = "";
@@ -45,7 +48,7 @@ const WelcomeCard = ({ insights }) => {
           <Sparkles className="h-8 w-8 text-cyan-400" />
 
           <h1 className="text-4xl font-bold text-white">
-            {greeting}, Ekshitha 👋
+            {greeting}, {profile?.username || "User"} 👋
           </h1>
         </div>
 

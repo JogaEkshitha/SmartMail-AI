@@ -1,8 +1,12 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+
 from .models import Email
 
-
+from .ai.gemini_spam import detect_spam_ai
+from .ai.gemini_priority import detect_priority_ai
+from .ai.gemini_category import classify_category_ai
+from .ai.gemini_summary import generate_ai_summary
 class EmailSerializer(serializers.ModelSerializer):
     sender = serializers.ReadOnlyField(source="sender.username")
 
@@ -66,75 +70,48 @@ class EmailSerializer(serializers.ModelSerializer):
         text = subject + " " + body
 
         # -------------------------
-        # Priority Detection
+        # AI Priority Detection
         # -------------------------
-        high_keywords = [
-            "urgent",
-            "asap",
-            "important",
-            "deadline",
-            "meeting",
-            "action required",
-            "immediately",
-            "critical",
-            "review",
-            "project",
-        ]
+        priority = detect_priority_ai(
+        validated_data.get("subject", ""),
+        validated_data.get("body", "")
+      )
+         # -------------------------
+         # AI Spam Detection
+         # -------------------------
 
-        if any(keyword in text for keyword in high_keywords):
-            priority = "High"
-        else:
-            priority = "Medium"
+        spam_result = detect_spam_ai(
+        validated_data.get("subject", ""),
+        validated_data.get("body", "")
+     )
+
+        spam_score = spam_result["spam_score"]
+        is_spam = spam_result["is_spam"]
 
         # -------------------------
-        # Spam Detection
+        # AI Category Classification
         # -------------------------
-        spam_keywords = [
-            "winner",
-            "free",
-            "lottery",
-            "claim",
-            "offer",
-            "click here",
-            "prize",
-            "congratulations",
-            "money",
-        ]
-
-        spam_score = 0.0
-
-        for keyword in spam_keywords:
-            if keyword in text:
-                spam_score += 0.2
-
-        spam_score = min(spam_score, 1.0)
+        category = classify_category_ai(
+        validated_data.get("subject", ""),
+        validated_data.get("body", "")
+   )
 
         # -------------------------
-        # Category Detection
+        # AI Summary
         # -------------------------
-        if "meeting" in text or "project" in text:
-            category = "Work"
-        elif "invoice" in text or "payment" in text:
-            category = "Finance"
-        elif "family" in text or "friend" in text:
-            category = "Personal"
-        else:
-            category = "General"
-
-        # -------------------------
-        # Simple Summary
-        # -------------------------
-        summary = validated_data.get("body", "")[:120]
+        summary = generate_ai_summary(
+           validated_data.get("body", "")
+   )
 
         email = Email.objects.create(
-            sender=self.context["request"].user,
-            recipient=recipient,
-            priority=priority,
-            spam_score=spam_score,
-            category=category,
-            summary=summary,
-            **validated_data
+           sender=self.context["request"].user,
+           recipient=recipient,
+           priority=priority,
+           category=category,
+           spam_score=spam_score,
+           is_spam=spam_result["is_spam"],
+           summary=summary,
+           **validated_data
         )
 
         return email
-    

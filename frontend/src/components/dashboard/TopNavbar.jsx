@@ -9,9 +9,11 @@ import {
 import { useSearch } from "../../context/SearchContext";
 import useNotifications from "../../hooks/useNotifications";
 import NotificationDropdown from "./NotificationDropdown";
+import useProfile from "../../hooks/useProfile";
 
 const TopNavbar = () => {
   const { searchQuery, setSearchQuery } = useSearch();
+  const { profile } = useProfile();
 
   const {
     notifications,
@@ -148,11 +150,11 @@ const TopNavbar = () => {
             <div className="hidden text-left sm:block">
 
               <p className="text-sm font-semibold text-white">
-                Ekshitha
+                  {profile?.username || "User"}
               </p>
 
               <p className="text-xs text-slate-400">
-                Product Manager
+               SmartMail AI User
               </p>
 
             </div>

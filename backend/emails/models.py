@@ -48,8 +48,10 @@ class Email(models.Model):
 
     spam_score = models.FloatField(default=0.0)
 
-    summary = models.TextField(blank=True)
+    is_spam = models.BooleanField(default=False)
 
+    summary = models.TextField(blank=True)
+    
     is_read = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)

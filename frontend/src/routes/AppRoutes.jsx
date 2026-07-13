@@ -9,7 +9,11 @@ import Inbox from "../pages/dashboard/Inbox";
 import EmailDetail from "../pages/dashboard/EmailDetail";
 import Sent from "../pages/dashboard/Sent";
 import Summary from "../pages/dashboard/Summary";
+import Spam from "../pages/dashboard/Spam";
 import Priority from "../pages/dashboard/Priority";
+import Categories from "../pages/dashboard/Categories";
+import Analytics from "../pages/dashboard/Analytics";
+import Settings from "../pages/dashboard/Settings";
 
 import ProtectedRoute from "./ProtectedRoute";
 import GuestRoute from "./GuestRoute";
@@ -92,6 +96,15 @@ function AppRoutes() {
           }
         />
 
+       <Route
+        path="/dashboard/spam"
+        element={
+        <ProtectedRoute>
+        <Spam />
+        </ProtectedRoute>
+      }
+   />
+
         <Route
           path="/dashboard/priority"
           element={
@@ -100,6 +113,31 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+         path="/dashboard/categories"
+         element={
+        <ProtectedRoute>
+        <Categories />
+       </ProtectedRoute>
+     }
+  />
+      <Route
+       path="/dashboard/analytics"
+       element={
+      <ProtectedRoute>
+      <Analytics />
+      </ProtectedRoute>
+    }
+ />
+        <Route
+  path="/dashboard/settings"
+  element={
+    <ProtectedRoute>
+      <Settings />
+    </ProtectedRoute>
+  }
+/>
 
       </Routes>
     </BrowserRouter>

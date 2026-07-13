@@ -6,6 +6,7 @@ import QuickActions from "../../components/dashboard/QuickActions";
 import RecentEmails from "../../components/dashboard/RecentEmails";
 import AIInsights from "../../components/dashboard/AIInsights";
 import api from "../../services/api";
+import { useSearch } from "../../context/SearchContext";
 
 import {
   Mail,
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 
 function Dashboard() {
+   const { searchQuery } = useSearch();
   const [dashboard, setDashboard] = useState({
     totalEmails: 0,
     priorityEmails: 0,
@@ -25,6 +27,7 @@ function Dashboard() {
   });
 
   const [loading, setLoading] = useState(true);
+  
 
   useEffect(() => {
     fetchDashboard();
@@ -99,11 +102,24 @@ function Dashboard() {
       <QuickActions />
 
       {/* Bottom Section */}
-      <div className="mt-10 grid gap-8 xl:grid-cols-3">
-        <div className="xl:col-span-2">
-          <RecentEmails emails={dashboard?.recentEmails || []} />
-        </div>
+<div className="mt-10 grid gap-8 xl:grid-cols-3">
+  <div className="xl:col-span-2">
+    <RecentEmails
+      emails={
+        dashboard?.recentEmails?.filter((email) => {
+          if (!searchQuery) return true;
 
+          const query = searchQuery.toLowerCase();
+
+          return (
+            email.subject?.toLowerCase().includes(query) ||
+            email.sender?.toLowerCase().includes(query) ||
+            email.body?.toLowerCase().includes(query)
+          );
+        }) || []
+      }
+    />
+  </div>
         <AIInsights insights={dashboard?.insights || []} />
       </div>
     </DashboardLayout>
