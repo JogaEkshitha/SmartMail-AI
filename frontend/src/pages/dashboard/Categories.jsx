@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import CategoryCard from "../../components/dashboard/CategoryCard";
-import api from "../../services/api";
+import useEmailSearch from "../../hooks/useEmailSearch";
 
 const categoryOrder = [
   "Work",
@@ -12,23 +11,7 @@ const categoryOrder = [
 ];
 
 function Categories() {
-  const [emails, setEmails] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const fetchCategories = async () => {
-    try {
-      const response = await api.get("emails/categories/");
-      setEmails(response.data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { emails, loading } = useEmailSearch("emails/categories/");
 
   const groupedEmails = categoryOrder.reduce((acc, category) => {
     acc[category] = emails.filter(
@@ -49,7 +32,6 @@ function Categories() {
 
   return (
     <DashboardLayout>
-
       <div className="mb-10">
         <h1 className="text-4xl font-bold text-white">
           Categories
@@ -61,7 +43,6 @@ function Categories() {
       </div>
 
       {categoryOrder.map((category) => {
-
         const categoryEmails = groupedEmails[category];
 
         if (categoryEmails.length === 0) return null;
@@ -71,9 +52,7 @@ function Categories() {
             key={category}
             className="mb-12"
           >
-
             <div className="mb-6 flex items-center justify-between">
-
               <h2 className="text-2xl font-bold text-white">
                 {category}
               </h2>
@@ -81,25 +60,19 @@ function Categories() {
               <span className="rounded-full bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-400">
                 {categoryEmails.length} Emails
               </span>
-
             </div>
 
             <div className="space-y-6">
-
               {categoryEmails.map((email) => (
                 <CategoryCard
                   key={email.id}
                   email={email}
                 />
               ))}
-
             </div>
-
           </div>
         );
-
       })}
-
     </DashboardLayout>
   );
 }

@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from emails.models import Email
-
+from emails.ai.dashboard_ai import generate_dashboard_insights
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -29,6 +29,14 @@ def dashboard_stats(request):
         summary=""
     ).count()
 
+    # Generate AI Assistant recommendations
+    insights = generate_dashboard_insights(
+        total_emails,
+        priority_emails,
+        spam_emails,
+        summary_count,
+    )
+
     recent_emails = Email.objects.filter(
         recipient=request.user
     ).order_by("-created_at")[:5]
@@ -50,4 +58,5 @@ def dashboard_stats(request):
         "spamEmails": spam_emails,
         "summaryCount": summary_count,
         "recentEmails": recent_data,
+        "insights": insights,
     })

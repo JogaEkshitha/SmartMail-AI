@@ -4,7 +4,7 @@ import WelcomeCard from "../../components/dashboard/WelcomeCard";
 import StatCard from "../../components/dashboard/StatCard";
 import QuickActions from "../../components/dashboard/QuickActions";
 import RecentEmails from "../../components/dashboard/RecentEmails";
-import AIInsights from "../../components/dashboard/AIInsights";
+import AIAssistant from "../../components/dashboard/AIAssistant";
 import api from "../../services/api";
 import { useSearch } from "../../context/SearchContext";
 
@@ -27,10 +27,12 @@ function Dashboard() {
   });
 
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
   
 
   useEffect(() => {
     fetchDashboard();
+    fetchProfile();
   }, []);
 
   const fetchDashboard = async () => {
@@ -43,6 +45,15 @@ function Dashboard() {
       setLoading(false);
     }
   };
+
+  const fetchProfile = async () => {
+  try {
+    const response = await api.get("accounts/profile/");
+    setUser(response.data);
+  } catch (error) {
+    console.error("Profile Error:", error);
+  }
+};
 
   if (loading) {
     return (
@@ -120,8 +131,10 @@ function Dashboard() {
       }
     />
   </div>
-        <AIInsights insights={dashboard?.insights || []} />
-      </div>
+  <AIAssistant insights={dashboard?.insights || []}
+   loading={loading}
+   username={user?.username} />      
+  </div>
     </DashboardLayout>
   );
 }

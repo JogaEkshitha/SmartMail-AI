@@ -9,6 +9,7 @@ from .views import (
     categories,
     analytics,
     email_detail,
+    ai_reply,
 )
 
 urlpatterns = [
@@ -20,5 +21,6 @@ urlpatterns = [
     path("spam/", spam_emails),
     path("categories/", categories),
     path("analytics/", analytics),
+    path("ai-reply/", ai_reply),
     path("<int:email_id>/", email_detail),
 ]

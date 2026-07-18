@@ -3,11 +3,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from collections import Counter
+from django.db.models import Q
 import re
 
 from .serializers import EmailSerializer
 from .models import Email
 from notifications.utils import create_notification
+from .ai.gemini_reply import generate_ai_replies
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -75,9 +77,21 @@ def send_email(request):
 @permission_classes([IsAuthenticated])
 def inbox(request):
 
+    query = request.GET.get("search", "").strip()
+
     emails = Email.objects.filter(
         recipient=request.user
-    ).order_by("-created_at")
+    )
+
+    if query:
+        emails = emails.filter(
+            Q(subject__icontains=query) |
+            Q(body__icontains=query) |
+            Q(sender__username__icontains=query) |
+            Q(category__icontains=query)
+        )
+
+    emails = emails.order_by("-created_at")
 
     serializer = EmailSerializer(
         emails,
@@ -85,7 +99,6 @@ def inbox(request):
     )
 
     return Response(serializer.data)
-
 
 # --------------------------
 # Email Detail API
@@ -119,9 +132,21 @@ def email_detail(request, email_id):
 @permission_classes([IsAuthenticated])
 def sent_emails(request):
 
+    query = request.GET.get("search", "").strip()
+
     emails = Email.objects.filter(
         sender=request.user
-    ).order_by("-created_at")
+    )
+
+    if query:
+        emails = emails.filter(
+            Q(subject__icontains=query) |
+            Q(body__icontains=query) |
+            Q(recipient__username__icontains=query) |
+            Q(category__icontains=query)
+        )
+
+    emails = emails.order_by("-created_at")
 
     serializer = EmailSerializer(
         emails,
@@ -129,7 +154,6 @@ def sent_emails(request):
     )
 
     return Response(serializer.data)
-
 
 # --------------------------
 # AI Summary API
@@ -208,10 +232,22 @@ def ai_summary(request):
 @permission_classes([IsAuthenticated])
 def priority_emails(request):
 
+    query = request.GET.get("search", "").strip()
+
     emails = Email.objects.filter(
         recipient=request.user,
         priority="High"
-    ).order_by("-created_at")
+    )
+
+    if query:
+        emails = emails.filter(
+            Q(subject__icontains=query) |
+            Q(body__icontains=query) |
+            Q(sender__username__icontains=query) |
+            Q(category__icontains=query)
+        )
+
+    emails = emails.order_by("-created_at")
 
     serializer = EmailSerializer(
         emails,
@@ -228,10 +264,22 @@ def priority_emails(request):
 @permission_classes([IsAuthenticated])
 def spam_emails(request):
 
+    query = request.GET.get("search", "").strip()
+
     emails = Email.objects.filter(
         recipient=request.user,
         is_spam=True
-    ).order_by("-created_at")
+    )
+
+    if query:
+        emails = emails.filter(
+            Q(subject__icontains=query) |
+            Q(body__icontains=query) |
+            Q(sender__username__icontains=query) |
+            Q(category__icontains=query)
+        )
+
+    emails = emails.order_by("-created_at")
 
     serializer = EmailSerializer(
         emails,
@@ -244,13 +292,29 @@ def spam_emails(request):
  # Categories API
  # --------------------------
 
+# --------------------------
+# Categories API
+# --------------------------
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def categories(request):
 
+    query = request.GET.get("search", "").strip()
+
     emails = Email.objects.filter(
         recipient=request.user
-    ).order_by("-created_at")
+    )
+
+    if query:
+        emails = emails.filter(
+            Q(subject__icontains=query) |
+            Q(body__icontains=query) |
+            Q(sender__username__icontains=query) |
+            Q(category__icontains=query)
+        )
+
+    emails = emails.order_by("-created_at")
 
     serializer = EmailSerializer(
         emails,
@@ -287,3 +351,50 @@ def analytics(request):
         "priority_emails": priority,
         "categories": categories,
     })
+    
+# --------------------------
+# Smart AI Reply API
+# --------------------------
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def ai_reply(request):
+    try:
+        subject = request.data.get("subject", "")
+        body = request.data.get("body", "")
+
+        print("========== AI REPLY ==========")
+        print("Subject:", subject)
+        print("Body:", body)
+        print("Username:", request.user.username)
+
+        if not body.strip():
+            return Response(
+                {"error": "Email body is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        replies = generate_ai_replies(
+            subject,
+            body,
+            request.user.username,
+        )
+
+        print("Gemini Result:", replies)
+
+        if replies is None:
+            return Response(
+                {"error": "Gemini returned None"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response(replies)
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
